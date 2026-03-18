@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>The Spiral Project — Ravelin</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+
+    #loading {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: #0d0a10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 999; transition: opacity 1s;
+    }
+    #loading.hidden { opacity: 0; pointer-events: none; }
+    .pulse {
+      width: 44px; height: 44px;
+      border: 2px solid #aa8084;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.8); opacity: 0.3; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+    #loading h1 {
+      color: #aa8084; font-family: Georgia, serif;
+      font-size: 16px; font-weight: normal;
+      letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    #loading p {
+      color: #53536b; font-family: Georgia, serif; font-size: 13px;
+    }
+
+    #info {
+      position: fixed; bottom: 16px; left: 12px; right: 12px;
+      background: rgba(13,10,16,0.88);
+      border: 1px solid rgba(170,128,132,0.2);
+      border-radius: 14px;
+      padding: 14px 18px; z-index: 10;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+    }
+    #info .label {
+      font-family: Georgia, serif;
+      font-size: 9px; letter-spacing: 3px;
+      text-transform: uppercase; color: #aa8084;
+      margin-bottom: 3px;
+    }
+    #info .title {
+      font-family: Georgia, serif;
+      font-size: 17px; color: #e8ddd4; margin-bottom: 4px;
+    }
+    #info .coords {
+      font-family: monospace; font-size: 11px;
+      color: #716b7f; margin-bottom: 6px;
+    }
+    #info .meta {
+      display: flex; gap: 16px;
+      font-size: 10px; color: #53536b;
+      font-family: Georgia, serif;
+    }
+    #info .meta span { color: #8e8597; }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="pulse"></div>
+  <h1>The Spiral Project</h1>
+  <p>Point camera at the wall</p>
+</div>
+
+<div id="info">
+  <div class="label">The Spiral Project — Encoded Location</div>
+  <div class="title">Ravelin Sports Centre</div>
+  <div class="coords">50.7946°N, 1.0966°W</div>
+  <div class="meta">
+    <div><span>336</span> bits</div>
+    <div>Fibonacci Nautilus</div>
+    <div>Ravelin Terracotta Palette</div>
+  </div>
+</div>
+
+<a-scene
+  mindar-image="imageTargetSrc: ravelin.mind; autoStart: true; uiLoading: no; uiScanning: no; uiError: no;"
+  color-space="sRGB"
+  renderer="colorManagement: true; antialias: true;"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
+  <a-assets>
+    <canvas id="spiralCanvas" width="2048" height="2048"></canvas>
+  </a-assets>
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <a-entity mindar-image-target="targetIndex: 0">
+    <!-- Frame outer -->
+    <a-plane
+      position="0 0.15 -0.002"
+      width="1.32" height="1.32"
+      material="color: #1a1418; shader: flat; opacity: 0; transparent: true; side: double;"
+      animation="property: material.opacity; from: 0; to: 0.95; dur: 1500; delay: 200; easing: easeOutCubic; startEvents: show;"
+    ></a-plane>
+
+    <!-- Frame gilt edge -->
+    <a-plane
+      position="0 0.15 -0.001"
+      width="1.24" height="1.24"
+      material="color: #2a2028; shader: flat; opacity: 0; transparent: true; side: double;"
+      animation="property: material.opacity; from: 0; to: 0.9; dur: 1500; delay: 300; easing: easeOutCubic; startEvents: show;"
+    ></a-plane>
+
+    <!-- Mount -->
+    <a-plane
+      position="0 0.15 0"
+      width="1.18" height="1.18"
+      material="color: #0d0a10; shader: flat; opacity: 0; transparent: true; side: double;"
+      animation="property: material.opacity; from: 0; to: 0.95; dur: 1500; delay: 400; easing: easeOutCubic; startEvents: show;"
+    ></a-plane>
+
+    <!-- Spiral -->
+    <a-plane
+      id="spiralPlane"
+      position="0 0.15 0.001"
+      width="1.05" height="1.05"
+      material="src: #spiralCanvas; transparent: true; opacity: 0; alphaTest: 0.01; side: double;"
+      animation="property: material.opacity; from: 0; to: 1; dur: 2000; delay: 600; easing: easeOutCubic; startEvents: show;"
+    ></a-plane>
+
+    <!-- Plaque -->
+    <a-plane
+      position="0 -0.58 0.001"
+      width="0.6" height="0.1"
+      material="color: #16121a; shader: flat; opacity: 0; transparent: true; side: double;"
+      animation="property: material.opacity; from: 0; to: 0.9; dur: 1000; delay: 2000; easing: easeOutCubic; startEvents: show;"
+    ></a-plane>
+
+    <a-text
+      value="Ravelin Sports Centre"
+      position="0 -0.56 0.002"
+      align="center" color="#b8999f" width="1.2" font="mozillavr"
+      opacity="0"
+      animation="property: opacity; from: 0; to: 1; dur: 1000; delay: 2200; easing: easeOutCubic; startEvents: show;"
+    ></a-text>
+
+    <a-text
+      value="50.7946N  1.0966W  |  336 bits encoded"
+      position="0 -0.60 0.002"
+      align="center" color="#53536b" width="0.9" font="mozillavr"
+      opacity="0"
+      animation="property: opacity; from: 0; to: 1; dur: 1000; delay: 2400; easing: easeOutCubic; startEvents: show;"
+    ></a-text>
+  </a-entity>
+</a-scene>
+
+<script>
+const PHI = (1 + Math.sqrt(5)) / 2;
+const LAT = 50.7946, LNG = -1.0966;
+
+const WARM_LINE = ['#ffd6c4','#ffb89e','#ff9e7a','#e8764e','#c95a3a','#a84232','#8b2e28','#6e1e1e'];
+const COOL_LINE = ['#b0a8d0','#8a7fc0','#6a5faa','#4e3f90','#3a2d78','#2a1f60','#1c1448','#100c30'];
+const RAVELIN = ['#d4b5b2','#b8999f','#aa8084','#916c74','#795963','#624751','#4b323d','#8e8597','#716b7f','#53536b','#3c3e54','#2c2433'];
+
+function seededRandom(seed) {
+  let s = seed;
+  return function() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+}
+
+function coordsToBinary(lat, lng) {
+  const latI = Math.abs(Math.round(lat * 100000));
+  const lngI = Math.abs(Math.round(lng * 100000));
+  const latB = latI.toString(2).padStart(24, '0');
+  const lngB = lngI.toString(2).padStart(24, '0');
+  let r = '';
+  for (let i = 0; i < 24; i++) r += latB[i] + lngB[i];
+  const base = r;
+  let extended = base;
+  let fib1 = 1, fib2 = 1;
+  for (let pass = 0; pass < 6; pass++) {
+    let shifted = '';
+    const offset = fib2;
+    for (let i = 0; i < base.length; i++) shifted += base[(i + offset) % base.length] === '1' ? '0' : '1';
+    extended += shifted;
+    const tmp = fib1 + fib2; fib1 = fib2; fib2 = tmp;
+  }
+  return extended;
+}
+
+function spiralPt(t, s) {
+  const r = s * Math.pow(PHI, (2 * t) / Math.PI);
+  return { x: r * Math.cos(t), y: r * Math.sin(t), r };
+}
+
+function prevTurnPt(t, s) {
+  const pt = t - 2 * Math.PI;
+  return pt < 0.3 ? null : spiralPt(pt, s);
+}
+
+function renderSpiral(progress) {
+  const c = document.getElementById('spiralCanvas');
+  const ctx = c.getContext('2d');
+  const sz = c.width, cx = sz / 2, cy = sz / 2;
+  const binary = coordsToBinary(LAT, LNG);
+  const total = binary.length;
+  const visible = Math.floor(total * progress);
+  const turns = 12 * Math.PI, sc = 0.9;
+
+  const seed = Math.abs(Math.round(LAT * 100000)) ^ Math.abs(Math.round(LNG * 100000));
+  const rng = seededRandom(seed);
+  const cc = [];
+  for (let i = 0; i < total; i++) cc.push(RAVELIN[Math.floor(rng() * RAVELIN.length)]);
+
+  ctx.clearRect(0, 0, sz, sz);
+  const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, sz * 0.5);
+  bg.addColorStop(0, '#0e0818'); bg.addColorStop(0.8, '#080510'); bg.addColorStop(1, '#04020a');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, sz, sz);
+
+  // Ghost
+  ctx.globalAlpha = 1; ctx.beginPath(); ctx.strokeStyle = 'rgba(110,90,180,0.04)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 1500 * progress; i++) {
+    const t = (i / 1500) * turns + 0.3 + Math.PI / PHI, p = spiralPt(t, sc);
+    i === 0 ? ctx.moveTo(cx + p.x, cy + p.y) : ctx.lineTo(cx + p.x, cy + p.y);
+  }
+  ctx.stroke();
+
+  // Chambers
+  for (let i = 1; i < visible; i++) {
+    const t1 = ((i-1)/total)*turns+0.3, t2 = (i/total)*turns+0.3;
+    const o1 = spiralPt(t1,sc), o2 = spiralPt(t2,sc), i1 = prevTurnPt(t1,sc), i2 = prevTurnPt(t2,sc);
+    if (!i1||!i2) continue;
+    ctx.globalAlpha = 0.75; ctx.fillStyle = cc[i];
+    ctx.beginPath(); ctx.moveTo(cx+o1.x,cy+o1.y); ctx.lineTo(cx+o2.x,cy+o2.y);
+    ctx.lineTo(cx+i2.x,cy+i2.y); ctx.lineTo(cx+i1.x,cy+i1.y); ctx.closePath(); ctx.fill();
+  }
+
+  // Backbone
+  ctx.globalAlpha = 1; ctx.beginPath(); ctx.strokeStyle = 'rgba(255,160,130,0.35)'; ctx.lineWidth = 2.5;
+  for (let i = 0; i <= 1500 * progress; i++) {
+    const t = (i/1500)*turns+0.3, p = spiralPt(t,sc);
+    i === 0 ? ctx.moveTo(cx+p.x,cy+p.y) : ctx.lineTo(cx+p.x,cy+p.y);
+  }
+  ctx.stroke();
+
+  // Walls
+  for (let i = 0; i < visible; i++) {
+    const bit = binary[i], t = (i/total)*turns+0.3, p = spiralPt(t,sc), prev = prevTurnPt(t,sc);
+    if (!prev) continue;
+    const ci = Math.min(7, Math.floor((i/total)*7.99));
+    const color = bit==='1' ? WARM_LINE[ci] : COOL_LINE[ci];
+    const fz = 12, fade = i < visible-fz ? 1 : (visible-i)/fz;
+
+    if (bit==='1') {
+      ctx.globalAlpha = 0.12*fade; ctx.strokeStyle = color; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(cx+p.x,cy+p.y); ctx.lineTo(cx+prev.x,cy+prev.y); ctx.stroke();
+    }
+    ctx.globalAlpha = (bit==='1'?0.92:0.32)*fade; ctx.strokeStyle = color; ctx.lineWidth = bit==='1'?3:1;
+    ctx.beginPath(); ctx.moveTo(cx+p.x,cy+p.y); ctx.lineTo(cx+prev.x,cy+prev.y); ctx.stroke();
+
+    ctx.fillStyle = color; ctx.globalAlpha = (bit==='1'?1:0.35)*fade;
+    ctx.beginPath(); ctx.arc(cx+p.x,cy+p.y,bit==='1'?2.8:1,0,Math.PI*2); ctx.fill();
+    if (bit==='1') {
+      ctx.globalAlpha = 0.3*fade;
+      ctx.beginPath(); ctx.arc(cx+prev.x,cy+prev.y,1.5,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  // Glow
+  ctx.globalAlpha = 1;
+  const time = Date.now()/1000, pu = 22+Math.sin(time*1.2)*8;
+  const g1 = ctx.createRadialGradient(cx,cy,0,cx,cy,pu);
+  g1.addColorStop(0,'rgba(255,180,150,0.6)'); g1.addColorStop(0.4,'rgba(255,140,100,0.2)'); g1.addColorStop(1,'rgba(255,100,80,0)');
+  ctx.fillStyle = g1; ctx.beginPath(); ctx.arc(cx,cy,pu,0,Math.PI*2); ctx.fill();
+  const g2 = ctx.createRadialGradient(cx,cy,0,cx,cy,pu*1.8);
+  g2.addColorStop(0,'rgba(140,100,200,0.08)'); g2.addColorStop(1,'rgba(100,60,180,0)');
+  ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(cx,cy,pu*1.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ffd6c4'; ctx.globalAlpha = 0.85+Math.sin(time*2)*0.15;
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
+}
+
+const sceneEl = document.querySelector('a-scene');
+const plane = document.getElementById('spiralPlane');
+let active = false, start = 0, af = null;
+
+sceneEl.addEventListener('arReady', () => { document.getElementById('loading').classList.add('hidden'); });
+
+sceneEl.addEventListener('targetFound', () => {
+  document.getElementById('info').style.display = 'block';
+  document.querySelectorAll('[animation]').forEach(el => el.emit('show'));
+  if (!active) { active = true; start = performance.now(); anim(); }
+});
+
+sceneEl.addEventListener('targetLost', () => { document.getElementById('info').style.display = 'none'; });
+
+function anim() {
+  const dur = 9000, now = performance.now(), p = Math.min(1,(now-start)/dur);
+  renderSpiral(1-Math.pow(1-p,3));
+  const m = plane.getObject3D('mesh');
+  if (m&&m.material&&m.material.map) m.material.map.needsUpdate = true;
+  if (p < 1) { af = requestAnimationFrame(anim); }
+  else { function pulse() { renderSpiral(1); if(m&&m.material&&m.material.map) m.material.map.needsUpdate=true; af=requestAnimationFrame(pulse); } af=requestAnimationFrame(pulse); }
+}
+</script>
+
+</body>
+</html>
